@@ -1,0 +1,376 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 800px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.header p {
+    font-size: 16px;
+    opacity: 0.95;
+    font-weight: 300;
+}
+
+.input-section {
+    padding: 30px;
+    border-bottom: 1px solid #eee;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#urlInput {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+#urlInput:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#analyzeBtn {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#analyzeBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+}
+
+#analyzeBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error-msg {
+    color: #d32f2f;
+    font-size: 14px;
+    padding: 10px;
+    background: #ffebee;
+    border-radius: 4px;
+    display: none;
+}
+
+.error-msg.hidden {
+    display: none;
+}
+
+.loading-msg {
+    text-align: center;
+    padding: 20px;
+    color: #667eea;
+    font-weight: 600;
+    display: block;
+}
+
+.loading-msg.hidden {
+    display: none;
+}
+
+.result-section {
+    padding: 30px;
+}
+
+.result-section.hidden {
+    display: none;
+}
+
+.result-card {
+    margin-bottom: 25px;
+    padding: 20px;
+    border-radius: 8px;
+    background: #f9f9f9;
+    border-left: 4px solid #ddd;
+}
+
+.result-card h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.result-card h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.risk-meter {
+    margin-bottom: 20px;
+}
+
+.risk-bar {
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.risk-fill {
+    height: 100%;
+    width: 0;
+    transition: width 0.5s ease;
+    background: linear-gradient(90deg, #4caf50, #fff59d, #ff7043);
+}
+
+.risk-fill.safe {
+    background: #4caf50;
+}
+
+.risk-fill.suspicious {
+    background: #ffc107;
+}
+
+.risk-fill.dangerous {
+    background: #d32f2f;
+}
+
+.risk-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.risk-score {
+    font-size: 36px;
+    font-weight: 700;
+    color: #333;
+}
+
+.risk-level {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.risk-card .risk-level.safe {
+    background: #c8e6c9;
+    color: #2e7d32;
+}
+
+.risk-card .risk-level.suspicious {
+    background: #fff9c4;
+    color: #f57f17;
+}
+
+.risk-card .risk-level.dangerous {
+    background: #ffcdd2;
+    color: #c62828;
+}
+
+.risk-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666;
+    margin-top: 10px;
+}
+
+.domain-info {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row .label {
+    font-weight: 600;
+    color: #666;
+    flex: 0 0 120px;
+}
+
+.info-row .value {
+    color: #333;
+    word-break: break-all;
+    flex: 1;
+}
+
+.checks-list {
+    background: white;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.check-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.check-item:last-child {
+    border-bottom: none;
+}
+
+.check-item.triggered {
+    background: #fff3e0;
+}
+
+.check-item.safe {
+    background: #f1f1f1;
+}
+
+.check-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.check-icon {
+    font-size: 16px;
+    flex: 0 0 20px;
+}
+
+.check-name {
+    flex: 1;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.check-score {
+    font-weight: 700;
+    font-size: 14px;
+    color: #d32f2f;
+    min-width: 40px;
+    text-align: right;
+}
+
+.check-item.safe .check-score {
+    color: #4caf50;
+}
+
+.check-description {
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+    margin-left: 30px;
+    font-style: italic;
+}
+
+.legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 25px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.legend-item.safe {
+    background: #c8e6c9;
+    color: #2e7d32;
+}
+
+.legend-item.suspicious {
+    background: #fff9c4;
+    color: #f57f17;
+}
+
+.legend-item.dangerous {
+    background: #ffcdd2;
+    color: #c62828;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .header {
+        padding: 30px 20px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    #analyzeBtn {
+        width: 100%;
+    }
+
+    .result-section {
+        padding: 20px;
+    }
+
+    .result-card {
+        padding: 15px;
+    }
+
+    .legend {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.hidden {
+    display: none !important;
+}

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Detection Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Phishing Detection Tool</h1>
+            <p>Check if a URL is safe or potentially malicious</p>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="urlInput"
+                    placeholder="Enter URL (e.g., https://example.com)"
+                    autocomplete="off"
+                >
+                <button id="analyzeBtn" onclick="analyzeURL()">Check URL</button>
+            </div>
+            <div id="errorMsg" class="error-msg"></div>
+        </div>
+
+        <div id="resultSection" class="result-section hidden">
+            <!-- Risk Score Card -->
+            <div class="result-card risk-card">
+                <h2>Risk Assessment</h2>
+                <div class="risk-meter">
+                    <div class="risk-bar">
+                        <div id="riskFill" class="risk-fill"></div>
+                    </div>
+                    <div class="risk-info">
+                        <span id="riskScore" class="risk-score">0</span>
+                        <span id="riskLevel" class="risk-level">Safe</span>
+                    </div>
+                </div>
+                <p id="riskDescription" class="risk-description"></p>
+            </div>
+
+            <!-- Domain Info Card -->
+            <div class="result-card domain-card">
+                <h3>Domain Information</h3>
+                <div class="domain-info">
+                    <div class="info-row">
+                        <span class="label">Domain:</span>
+                        <span id="domainName" class="value">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">TLD:</span>
+                        <span id="domainTLD" class="value">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checks Breakdown Card -->
+            <div class="result-card checks-card">
+                <h3>Security Checks</h3>
+                <div class="checks-list">
+                    <div id="checksList"></div>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend">
+                <div class="legend-item safe">🟢 Safe (Score: 0-29)</div>
+                <div class="legend-item suspicious">🟡 Suspicious (Score: 30-59)</div>
+                <div class="legend-item dangerous">🔴 Dangerous (Score: 60-100)</div>
+            </div>
+        </div>
+
+        <div id="loadingMsg" class="loading-msg hidden">Analyzing URL...</div>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultSection = document.getElementById('resultSection');
+        const errorMsg = document.getElementById('errorMsg');
+        const loadingMsg = document.getElementById('loadingMsg');
+
+        // Allow Enter key to submit
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') analyzeURL();
+        });
+
+        async function analyzeURL() {
+            const url = urlInput.value.trim();
+
+            // Clear previous messages
+            errorMsg.textContent = '';
+            errorMsg.classList.add('hidden');
+            resultSection.classList.add('hidden');
+
+            if (!url) {
+                errorMsg.textContent = 'Please enter a URL';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading state
+            loadingMsg.classList.remove('hidden');
+            analyzeBtn.disabled = true;
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    errorMsg.textContent = error.error || 'Error analyzing URL';
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
+
+                const data = await response.json();
+                displayResults(data);
+                resultSection.classList.remove('hidden');
+            } catch (error) {
+                errorMsg.textContent = 'Network error: ' + error.message;
+                errorMsg.classList.remove('hidden');
+            } finally {
+                loadingMsg.classList.add('hidden');
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            const score = data.score;
+            const level = data.level;
+
+            // Update risk meter
+            document.getElementById('riskScore').textContent = score;
+            document.getElementById('riskLevel').textContent = level.charAt(0).toUpperCase() + level.slice(1);
+
+            const riskFill = document.getElementById('riskFill');
+            riskFill.style.width = score + '%';
+            riskFill.className = 'risk-fill ' + level;
+
+            // Risk description
+            let description = '';
+            if (level === 'safe') {
+                description = '✅ This URL appears to be safe. Proceed with caution.';
+            } else if (level === 'suspicious') {
+                description = '⚠️ This URL has suspicious characteristics. Verify before clicking.';
+            } else {
+                description = '🚨 This URL shows signs of being phishing. Do not enter credentials.';
+            }
+            document.getElementById('riskDescription').textContent = description;
+
+            // Domain info
+            document.getElementById('domainName').textContent = data.domain;
+            document.getElementById('domainTLD').textContent = data.tld || '-';
+
+            // Checks breakdown
+            const checksList = document.getElementById('checksList');
+            checksList.innerHTML = '';
+
+            data.checks.forEach((check, index) => {
+                const triggered = check.triggered;
+                const checkDiv = document.createElement('div');
+                checkDiv.className = 'check-item ' + (triggered ? 'triggered' : 'safe');
+
+                const icon = triggered ? '⚠️' : '✅';
+                const scoreText = triggered ? `+${check.score}` : '0';
+
+                checkDiv.innerHTML = `
+                    <div class="check-header">
+                        <span class="check-icon">${icon}</span>
+                        <span class="check-name">${check.name}</span>
+                        <span class="check-score">${scoreText}</span>
+                    </div>
+                    ${triggered && check.description ? `<div class="check-description">${check.description}</div>` : ''}
+                `;
+
+                checksList.appendChild(checkDiv);
+            });
+        }
+    </script>
+</body>
+</html>
